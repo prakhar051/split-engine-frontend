@@ -24,8 +24,13 @@ export default function EditExpensePage() {
   }, [groupId, expenseId, getGroupDetails, getExpense, currentGroup, clearCurrentExpense]);
 
   const handleSubmit = async (payload) => {
+    const payloadWithGroup = {
+      ...payload,
+      groupId
+    };
+
     try {
-      const updated = await updateExpense(expenseId, payload);
+      const updated = await updateExpense(expenseId, payloadWithGroup);
       if (updated) {
         navigate(`/groups/${groupId}/expenses/${expenseId}`);
       }
