@@ -10,6 +10,7 @@ export default function RegisterPage() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [localError, setLocalError] = useState(null);
+  const [isRegistered, setIsRegistered] = useState(false);
   const navigate = useNavigate();
 
   const getPasswordStrength = (pwd) => {
@@ -52,11 +53,45 @@ export default function RegisterPage() {
 
     try {
       await register(name, email, password);
-      navigate('/');
+      setIsRegistered(true);
     } catch (err) {
       // Error handled by store
     }
   };
+
+  if (isRegistered) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex flex-col justify-center items-center px-4 py-12 font-sans">
+        <div className="w-full max-w-md">
+          {/* Logo Header */}
+          <div className="text-center mb-8 flex flex-col items-center">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-violet-600 to-indigo-600 flex items-center justify-center font-bold text-white text-xl shadow-lg shadow-indigo-500/20 mb-3">
+              $
+            </div>
+            <h2 className="text-3xl font-extrabold tracking-tight text-white">Verify Your Email</h2>
+          </div>
+
+          <div className="bg-slate-900/60 backdrop-blur-md border border-slate-800 rounded-2xl p-8 shadow-2xl text-center space-y-6">
+            <div className="w-16 h-16 bg-indigo-950/30 border border-indigo-900/50 rounded-full flex items-center justify-center mx-auto text-indigo-400">
+              <Mail className="w-8 h-8" />
+            </div>
+            <h3 className="text-xl font-bold text-white">Check your inbox</h3>
+            <p className="text-slate-300 text-sm">
+              We have sent a verification link to <strong className="text-slate-100">{email}</strong>. Please click the link to activate your account.
+            </p>
+            <div className="pt-4">
+              <Link
+                to="/login"
+                className="inline-flex w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-sm rounded-xl transition duration-200 justify-center items-center shadow-md shadow-indigo-600/10"
+              >
+                Back to Sign In
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-950 flex flex-col justify-center items-center px-4 py-12 font-sans">

@@ -102,6 +102,78 @@ describe('Zustand Client State Stores', () => {
       expect(state.accessToken).toBeNull();
       expect(state.isAuthenticated).toBe(false);
     });
+
+    test('updateSettings calls backend and updates user', async () => {
+      useAuthStore.setState({ accessToken: 'jwt_mock_token_xyz', user: { name: 'Old Name' } });
+      const updatedUser = { id: 'u1', name: 'New Name', email: 'john@doe.com' };
+      axios.put.mockResolvedValueOnce({
+        data: {
+          success: true,
+          user: updatedUser
+        }
+      });
+
+      const res = await useAuthStore.getState().updateSettings({ name: 'New Name' });
+
+      expect(axios.put).toHaveBeenCalledWith(
+        expect.stringContaining('/auth/settings'),
+        { name: 'New Name' },
+        expect.objectContaining({
+          headers: { Authorization: 'Bearer jwt_mock_token_xyz' }
+        })
+      );
+      expect(useAuthStore.getState().user).toEqual(updatedUser);
+    });
+
+    test('deleteAccount calls backend and resets auth state', async () => {
+      useAuthStore.setState({ accessToken: 'jwt_mock_token_xyz', user: { name: 'John' }, isAuthenticated: true });
+      axios.delete.mockResolvedValueOnce({ data: { success: true } });
+
+      await useAuthStore.getState().deleteAccount();
+
+      expect(axios.delete).toHaveBeenCalledWith(
+        expect.stringContaining('/auth/account'),
+        expect.objectContaining({
+          headers: { Authorization: 'Bearer jwt_mock_token_xyz' }
+        })
+      );
+      const state = useAuthStore.getState();
+      expect(state.user).toBeNull();
+      expect(state.isAuthenticated).toBe(false);
+    });
+
+    test('fetchSessions and revokeSession manage sessions list', async () => {
+      useAuthStore.setState({ accessToken: 'jwt_mock_token_xyz' });
+      const mockSessions = [{ id: 's1', os: 'Windows' }, { id: 's2', os: 'iOS' }];
+      axios.get.mockResolvedValueOnce({
+        data: {
+          success: true,
+          sessions: mockSessions
+        }
+      });
+
+      await useAuthStore.getState().fetchSessions();
+
+      expect(axios.get).toHaveBeenCalledWith(
+        expect.stringContaining('/auth/sessions'),
+        expect.objectContaining({
+          headers: { Authorization: 'Bearer jwt_mock_token_xyz' }
+        })
+      );
+      expect(useAuthStore.getState().sessions).toEqual(mockSessions);
+
+      // Now revoke session s1
+      axios.delete.mockResolvedValueOnce({ data: { success: true } });
+      await useAuthStore.getState().revokeSession('s1');
+
+      expect(axios.delete).toHaveBeenCalledWith(
+        expect.stringContaining('/auth/sessions/s1'),
+        expect.objectContaining({
+          headers: { Authorization: 'Bearer jwt_mock_token_xyz' }
+        })
+      );
+      expect(useAuthStore.getState().sessions).toEqual([{ id: 's2', os: 'iOS' }]);
+    });
   });
 
   // 2. Group Store

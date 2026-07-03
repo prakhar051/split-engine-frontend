@@ -6,6 +6,10 @@ import { Layout } from './components/layout/Layout';
 import DashboardPage from './pages/DashboardPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import VerifyEmailPage from './pages/VerifyEmailPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
+import InvitationAcceptPage from './pages/InvitationAcceptPage';
 import ProfileSettingsPage from './pages/ProfileSettingsPage';
 import GroupsPage from './pages/GroupsPage';
 import GroupDetailsPage from './pages/GroupDetailsPage';
@@ -49,10 +53,16 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* Open Routes (Guest & Auth Users) */}
+        <Route path="/invitations/:token" element={<InvitationAcceptPage />} />
+
         {/* Public-only Routes */}
         <Route element={<PublicOnlyRoute />}>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/verify-email" element={<VerifyEmailPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
         </Route>
 
         {/* Protected Routes inside Global Layout */}

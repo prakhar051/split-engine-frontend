@@ -10,6 +10,7 @@ export const useAuthStore = create((set, get) => ({
   isLoading: false,
   isInitialized: false,
   authError: null,
+  sessions: [],
 
   setAccessToken: (token) => set({ accessToken: token, isAuthenticated: !!token }),
 
@@ -19,18 +20,17 @@ export const useAuthStore = create((set, get) => ({
     user: null,
     accessToken: null,
     isAuthenticated: false,
-    authError: null
+    authError: null,
+    sessions: []
   }),
 
   register: async (name, email, password) => {
     set({ isLoading: true, authError: null });
     try {
       const response = await axios.post(`${API_URL}/auth/register`, { name, email, password }, { withCredentials: true });
-      const { user, accessToken } = response.data;
+      const { user } = response.data;
+      // Note: register doesn't log in directly because of verification gate
       set({
-        user,
-        accessToken,
-        isAuthenticated: true,
         isLoading: false
       });
       return response.data;
@@ -114,6 +114,85 @@ export const useAuthStore = create((set, get) => ({
     } catch (error) {
       get().logoutClient();
       set({ isLoading: false, isInitialized: true });
+    }
+  },
+
+  updateSettings: async (settingsData) => {
+    set({ isLoading: true, authError: null });
+    try {
+      const token = get().accessToken;
+      const response = await axios.put(
+        `${API_URL}/auth/settings`,
+        settingsData,
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+      if (response.data.user) {
+        set({ user: response.data.user });
+      }
+      set({ isLoading: false });
+      return response.data;
+    } catch (error) {
+      const errMsg = error.response?.data?.message || 'Failed to update settings';
+      set({ authError: errMsg, isLoading: false });
+      throw error;
+    }
+  },
+
+  deleteAccount: async () => {
+    set({ isLoading: true, authError: null });
+    try {
+      const token = get().accessToken;
+      await axios.delete(
+        `${API_URL}/auth/account`,
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+      get().logoutClient();
+      set({ isLoading: false });
+    } catch (error) {
+      const errMsg = error.response?.data?.message || 'Failed to delete account';
+      set({ authError: errMsg, isLoading: false });
+      throw error;
+    }
+  },
+
+  fetchSessions: async () => {
+    set({ isLoading: true, authError: null });
+    try {
+      const token = get().accessToken;
+      const response = await axios.get(
+        `${API_URL}/auth/sessions`,
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+      set({ sessions: response.data.sessions || [], isLoading: false });
+    } catch (error) {
+      const errMsg = error.response?.data?.message || 'Failed to fetch sessions';
+      set({ authError: errMsg, isLoading: false });
+      throw error;
+    }
+  },
+
+  revokeSession: async (sessionId) => {
+    set({ isLoading: true, authError: null });
+    try {
+      const token = get().accessToken;
+      await axios.delete(
+        `${API_URL}/auth/sessions/${sessionId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+      const filtered = get().sessions.filter(s => s.id !== sessionId);
+      set({ sessions: filtered, isLoading: false });
+    } catch (error) {
+      const errMsg = error.response?.data?.message || 'Failed to revoke session';
+      set({ authError: errMsg, isLoading: false });
+      throw error;
     }
   }
 }));
