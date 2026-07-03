@@ -32,13 +32,13 @@ import DeploymentStatusPage from './pages/DeploymentStatusPage';
 
 function App() {
   const checkAuth = useAuthStore((state) => state.checkAuth);
-  const isLoading = useAuthStore((state) => state.isLoading);
+  const isInitialized = useAuthStore((state) => state.isInitialized);
 
   useEffect(() => {
     checkAuth();
   }, [checkAuth]);
 
-  if (isLoading) {
+  if (!isInitialized) {
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center">
         <div className="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>

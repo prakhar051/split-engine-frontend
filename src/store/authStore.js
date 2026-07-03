@@ -8,6 +8,7 @@ export const useAuthStore = create((set, get) => ({
   accessToken: null,
   isAuthenticated: false,
   isLoading: false,
+  isInitialized: false,
   authError: null,
 
   setAccessToken: (token) => set({ accessToken: token, isAuthenticated: !!token }),
@@ -107,11 +108,12 @@ export const useAuthStore = create((set, get) => ({
         user,
         accessToken,
         isAuthenticated: true,
-        isLoading: false
+        isLoading: false,
+        isInitialized: true
       });
     } catch (error) {
       get().logoutClient();
-      set({ isLoading: false });
+      set({ isLoading: false, isInitialized: true });
     }
   }
 }));
