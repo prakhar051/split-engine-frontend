@@ -104,6 +104,54 @@ export const useGroupStore = create((set, get) => ({
     }
   },
 
+  createShareableInvite: async (groupId, maxUses, expiresIn) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await api.post(`/groups/${groupId}/invites`, { maxUses, expiresIn });
+      const newInvite = response.data.invite;
+      set((state) => ({
+        invites: [newInvite, ...state.invites],
+        isLoading: false
+      }));
+      return response.data;
+    } catch (err) {
+      set({ error: err.response?.data?.message || 'Failed to create shareable invite', isLoading: false });
+      throw err;
+    }
+  },
+
+  deactivateInvite: async (groupId, inviteId) => {
+    set({ isLoading: true, error: null });
+    try {
+      await api.delete(`/groups/${groupId}/invites/${inviteId}`);
+      set((state) => ({
+        invites: state.invites.map((inv) =>
+          inv.id === inviteId ? { ...inv, isActive: false, revokedAt: new Date() } : inv
+        ),
+        isLoading: false
+      }));
+    } catch (err) {
+      set({ error: err.response?.data?.message || 'Failed to deactivate invite', isLoading: false });
+      throw err;
+    }
+  },
+
+  regenerateInvite: async (groupId, inviteId) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await api.patch(`/groups/${groupId}/invites/${inviteId}/regenerate`);
+      const updatedInvite = response.data.invite;
+      set((state) => ({
+        invites: state.invites.map((inv) => inv.id === inviteId ? updatedInvite : inv),
+        isLoading: false
+      }));
+      return response.data;
+    } catch (err) {
+      set({ error: err.response?.data?.message || 'Failed to regenerate invite', isLoading: false });
+      throw err;
+    }
+  },
+
   joinGroup: async (inviteCode) => {
     set({ isLoading: true, error: null });
     try {
