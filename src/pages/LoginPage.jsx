@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { useAuthStore } from '../store/authStore';
 import { Mail, Lock, LogIn, AlertCircle, CheckCircle2, ArrowRight } from 'lucide-react';
@@ -11,6 +11,8 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const redirectTo = searchParams.get('redirectTo') || '/';
 
   // Unverified email states
   const [isUnverified, setIsUnverified] = useState(false);
@@ -26,7 +28,7 @@ export default function LoginPage() {
 
     try {
       await login(email, password);
-      navigate('/');
+      navigate(redirectTo);
     } catch (err) {
       if (err.response?.data?.errorCode === 'EMAIL_NOT_VERIFIED') {
         setIsUnverified(true);

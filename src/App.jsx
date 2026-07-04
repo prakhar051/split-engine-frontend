@@ -10,6 +10,7 @@ import VerifyEmailPage from './pages/VerifyEmailPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import InvitationAcceptPage from './pages/InvitationAcceptPage';
+import InviteLandingPage from './pages/InviteLandingPage';
 import ProfileSettingsPage from './pages/ProfileSettingsPage';
 import GroupsPage from './pages/GroupsPage';
 import GroupDetailsPage from './pages/GroupDetailsPage';
@@ -55,6 +56,7 @@ function App() {
       <Routes>
         {/* Open Routes (Guest & Auth Users) */}
         <Route path="/invitations/:token" element={<InvitationAcceptPage />} />
+        <Route path="/invite/:token" element={<InviteLandingPage />} />
 
         {/* Public-only Routes */}
         <Route element={<PublicOnlyRoute />}>
